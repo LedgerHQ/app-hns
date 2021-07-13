@@ -157,7 +157,7 @@ static ledger_blake2b_ctx blake2;
  */
 static inline bool
 parse_item(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *item,
   size_t item_sz,
@@ -192,7 +192,7 @@ parse_item(
  */
 static inline bool
 parse_addr(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *addr_hash,
   uint8_t *addr_len,
@@ -227,7 +227,7 @@ parse_addr(
  */
 static inline bool
 parse_name(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   char *name,
   uint8_t *name_len,
@@ -268,7 +268,7 @@ parse_name(
  */
 static inline bool
 cmp_name(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *name_hash,
   char *name,
@@ -312,7 +312,7 @@ cmp_name(
  */
 static inline bool
 parse_resource_len(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   hns_varint_t *ctr,
   ledger_blake2b_ctx *hash
@@ -345,7 +345,7 @@ parse_resource_len(
  */
 static inline bool
 parse_resource(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   hns_varint_t *ctr,
   ledger_blake2b_ctx *hash
@@ -393,8 +393,8 @@ static inline uint8_t
 parse(
   uint8_t p1,
   uint16_t *len,
-  volatile uint8_t *buf,
-  volatile uint8_t *res,
+  uint8_t *buf,
+  uint8_t *res,
   volatile uint8_t *flags
 ) {
   hns_input_t in;
@@ -989,8 +989,8 @@ static inline uint8_t
 sign(
   uint8_t p1,
   uint16_t *len,
-  volatile uint8_t *buf,
-  volatile uint8_t *sig,
+  uint8_t *buf,
+  uint8_t *sig,
   volatile uint8_t *flags
 ) {
   if (!ctx.tx_parsed)
@@ -1245,8 +1245,8 @@ hns_apdu_get_input_signature(
   uint8_t p1,
   uint8_t p2,
   uint16_t len,
-  volatile uint8_t *in,
-  volatile uint8_t *out,
+  uint8_t *in,
+  uint8_t *out,
   volatile uint8_t *flags
 ) {
   switch(p1 & P1_INIT_MASK) {

@@ -150,7 +150,7 @@ ledger_apdu_buffer_clear(void);
  * @return boolean indicating success or failure.
  */
 bool
-ledger_apdu_cache_write(volatile uint8_t *src, uint8_t src_len);
+ledger_apdu_cache_write(const uint8_t *src, uint8_t src_len);
 
 /**
  * Copies all data in the cache to the APDU exchange buffer. The len
@@ -239,7 +239,7 @@ ledger_blake2b_init(ledger_blake2b_ctx *ctx, size_t digest_sz);
 void
 ledger_blake2b_update(
   ledger_blake2b_ctx *ctx,
-  volatile void const *data,
+  void const *data,
   size_t data_sz
 );
 
@@ -282,7 +282,7 @@ ledger_ecdsa_sign(
   uint8_t depth,
   uint8_t *hash,
   size_t hash_len,
-  volatile uint8_t *sig,
+  uint8_t *sig,
   uint8_t sig_len
 );
 

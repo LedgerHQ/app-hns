@@ -101,7 +101,7 @@ ledger_apdu_buffer_clear(void) {
 }
 
 bool
-ledger_apdu_cache_write(volatile uint8_t *src, uint8_t src_len) {
+ledger_apdu_cache_write(const uint8_t *src, uint8_t src_len) {
   if (src_len < 1)
     return false;
 
@@ -182,7 +182,7 @@ ledger_blake2b(
 
   cx_blake2b_t ctx;
   cx_blake2b_init(&ctx, digest_sz * 8);
-  cx_hash(&ctx.header, CX_LAST, data, data_sz, digest, digest_sz);
+  cx_hash(&ctx.header, CX_LAST, data, data_sz, (uint8_t *) digest, digest_sz);
   return 0;
 }
 
@@ -194,10 +194,10 @@ ledger_blake2b_init(ledger_blake2b_ctx *ctx, size_t digest_sz) {
 void
 ledger_blake2b_update(
   ledger_blake2b_ctx *ctx,
-  volatile void const *data,
+  void const *data,
   size_t data_sz
 ) {
-  cx_hash(&ctx->header, 0, data, data_sz, NULL, 0);
+  cx_hash(&ctx->header, 0, (uint8_t *) data, data_sz, NULL, 0);
 }
 
 void
@@ -265,7 +265,7 @@ ledger_ecdsa_derive_xpub(ledger_ecdsa_xpub_t *xpub) {
  * @return a boolean indicating success or failure.
  */
 static inline bool
-parse_der(uint8_t *der, uint8_t der_len, volatile uint8_t *sig, uint8_t sig_sz) {
+parse_der(uint8_t *der, uint8_t der_len, uint8_t *sig, uint8_t sig_sz) {
   if (der == NULL || der_len < 70 || der_len > 72)
     return false;
 
@@ -398,7 +398,7 @@ ledger_ecdsa_sign(
   uint8_t depth,
   uint8_t *hash,
   size_t hash_len,
-  volatile uint8_t *sig,
+  uint8_t *sig,
   uint8_t sig_sz
 ) {
   uint8_t der_sig[72];
@@ -476,7 +476,7 @@ ux_state_t ux;
  */
 
 uint8_t
-io_event(uint8_t channel) {
+io_event(uint8_t channel __attribute__((unused))) {
   switch (G_io_seproxyhal_spi_buffer[0]) {
     case SEPROXYHAL_TAG_FINGER_EVENT:
       UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);

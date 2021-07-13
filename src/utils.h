@@ -239,7 +239,7 @@ size_varsize(size_t val) {
 }
 
 static inline bool
-read_u8(volatile uint8_t **buf, uint16_t *len, uint8_t *u8) {
+read_u8(uint8_t **buf, uint16_t *len, uint8_t *u8) {
   if (*len < 1)
     return false;
 
@@ -251,7 +251,7 @@ read_u8(volatile uint8_t **buf, uint16_t *len, uint8_t *u8) {
 }
 
 static inline bool
-read_u16(volatile uint8_t **buf, uint16_t *len, uint16_t *u16, bool be) {
+read_u16(uint8_t **buf, uint16_t *len, uint16_t *u16, bool be) {
   if (*len < 2)
     return false;
 
@@ -270,7 +270,7 @@ read_u16(volatile uint8_t **buf, uint16_t *len, uint16_t *u16, bool be) {
 }
 
 static inline bool
-read_u32(volatile uint8_t **buf, uint16_t *len, uint32_t *u32, bool be) {
+read_u32(uint8_t **buf, uint16_t *len, uint32_t *u32, bool be) {
   if (*len < 4)
     return false;
 
@@ -291,7 +291,7 @@ read_u32(volatile uint8_t **buf, uint16_t *len, uint32_t *u32, bool be) {
 }
 
 static inline bool
-read_varint(volatile uint8_t **buf, uint16_t *len, hns_varint_t *varint) {
+read_varint(uint8_t **buf, uint16_t *len, hns_varint_t *varint) {
   if (*len < 1)
     return false;
 
@@ -350,7 +350,7 @@ read_varint(volatile uint8_t **buf, uint16_t *len, hns_varint_t *varint) {
 }
 
 static inline bool
-peek_varint(volatile uint8_t **buf, uint16_t *len, hns_varint_t *varint) {
+peek_varint(uint8_t **buf, uint16_t *len, hns_varint_t *varint) {
   if (!read_varint(buf, len, varint))
     return false;
 
@@ -363,7 +363,7 @@ peek_varint(volatile uint8_t **buf, uint16_t *len, hns_varint_t *varint) {
 }
 
 static inline bool
-read_varsize(volatile uint8_t **buf, uint16_t *len, size_t *val) {
+read_varsize(uint8_t **buf, uint16_t *len, size_t *val) {
   hns_varint_t v;
 
   if (!read_varint(buf, len, &v))
@@ -375,7 +375,7 @@ read_varsize(volatile uint8_t **buf, uint16_t *len, size_t *val) {
 }
 
 static inline bool
-read_bytes(volatile uint8_t **buf, uint16_t *len, volatile uint8_t *out, size_t sz) {
+read_bytes(uint8_t **buf, uint16_t *len, uint8_t *out, size_t sz) {
   if (*len < sz)
     return false;
 
@@ -389,7 +389,7 @@ read_bytes(volatile uint8_t **buf, uint16_t *len, volatile uint8_t *out, size_t 
 
 static inline bool
 read_varbytes(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *out,
   size_t out_sz,
@@ -423,7 +423,7 @@ read_varbytes(
 
 static inline bool
 read_bip44_path(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *depth,
   uint32_t *path,
@@ -492,7 +492,7 @@ read_bip44_path(
 }
 
 static inline size_t
-write_u8(volatile uint8_t **buf, uint8_t u8) {
+write_u8(uint8_t **buf, uint8_t u8) {
   if (buf == NULL || *buf == NULL)
     return 0;
 
@@ -503,7 +503,7 @@ write_u8(volatile uint8_t **buf, uint8_t u8) {
 }
 
 static inline size_t
-write_u16(volatile uint8_t **buf, uint16_t u16, bool be) {
+write_u16(uint8_t **buf, uint16_t u16, bool be) {
   if (buf == NULL || *buf == NULL)
     return 0;
 
@@ -520,7 +520,7 @@ write_u16(volatile uint8_t **buf, uint16_t u16, bool be) {
 }
 
 static inline size_t
-write_u32(volatile uint8_t **buf, uint32_t u32, bool be) {
+write_u32(uint8_t **buf, uint32_t u32, bool be) {
   if (buf == NULL || *buf == NULL)
     return 0;
 
@@ -540,8 +540,8 @@ write_u32(volatile uint8_t **buf, uint32_t u32, bool be) {
 
 static inline size_t
 write_bytes(
-  volatile uint8_t **buf,
-  volatile const uint8_t *bytes,
+  uint8_t **buf,
+  const uint8_t *bytes,
   size_t sz
 ) {
   if (buf == NULL || *buf == NULL)
@@ -554,7 +554,7 @@ write_bytes(
 }
 
 static inline size_t
-write_varint(volatile uint8_t **buf, hns_varint_t val) {
+write_varint(uint8_t **buf, hns_varint_t val) {
   if (buf == NULL || *buf == NULL)
     return 0;
 
@@ -579,14 +579,14 @@ write_varint(volatile uint8_t **buf, hns_varint_t val) {
 }
 
 static inline size_t
-write_varsize(volatile uint8_t **buf, size_t val) {
+write_varsize(uint8_t **buf, size_t val) {
   return write_varint(buf, (uint64_t)val);
 }
 
 static inline size_t
 write_varbytes(
-  volatile uint8_t **buf,
-  volatile const uint8_t *bytes,
+  uint8_t **buf,
+  const uint8_t *bytes,
   size_t sz
 ) {
   if (buf == NULL || *buf == NULL)

@@ -37,20 +37,20 @@ static const char covenant_labels[12][9] = {
 
 #define LEDGER_UI_BACKGROUND() \
   {{BAGL_RECTANGLE,0,0,0,128,32,0,0,BAGL_FILL,0,0xFFFFFF,0,0}, \
-   NULL,0,0,0,NULL,NULL,NULL}
+   NULL}
 
 #define LEDGER_UI_ICON_LEFT(userid, glyph) \
   {{BAGL_ICON,userid,3,12,7,7,0,0,0,0xFFFFFF,0,0,glyph}, \
-   NULL,0,0,0,NULL,NULL,NULL}
+   NULL}
 
 #define LEDGER_UI_ICON_RIGHT(userid, glyph) \
   {{BAGL_ICON,userid,117,13,8,6,0,0,0,0xFFFFFF,0,0,glyph}, \
-   NULL,0,0,0,NULL,NULL,NULL}
+   NULL}
 
 #define LEDGER_UI_TEXT(userid, x, y, w, text) \
   {{BAGL_LABELINE,userid,x,y,w,12,0,0,0,0xFFFFFF,0, \
     BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER,0}, \
-   (char *)text,0,0,0,NULL,NULL,NULL}
+   (char *)text}
 
 static ux_menu_entry_t const main_menu[4];
 
@@ -117,7 +117,7 @@ static bagl_element_t const ledger_ui_display[] = {
  * name of the corresponding screen with '_button' appended.
  */
 static uint32_t
-ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
+ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
   switch (mask) {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT: {
       ledger_apdu_buffer_clear();
@@ -280,7 +280,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
  * name of the corresponding screen with '_button' appended.
  */
 static uint32_t
-ledger_ui_display_button(uint32_t mask, uint32_t ctr) {
+ledger_ui_display_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
   char *viewport = g_ledger.ui.viewport;
   char *message = g_ledger.ui.message;
   uint8_t *pos = &g_ledger.ui.message_pos;

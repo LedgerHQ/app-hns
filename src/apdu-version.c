@@ -11,9 +11,9 @@ hns_apdu_get_app_version(
   uint8_t p1,
   uint8_t p2,
   uint8_t len,
-  volatile uint8_t *in,
-  volatile uint8_t *out,
-  volatile uint8_t *flags
+  uint8_t *in __attribute__((unused)),
+  uint8_t *out,
+  volatile uint8_t *flags __attribute__((unused))
 ) {
   if (!ledger_unlocked())
     THROW(HNS_SECURITY_CONDITION_NOT_SATISFIED);
