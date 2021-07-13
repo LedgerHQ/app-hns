@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "apdu.h"
+#include "crypto.h"
 #include "ledger.h"
 #include "utils.h"
 

@@ -5,6 +5,7 @@
  */
 #include <string.h>
 #include "apdu.h"
+#include "crypto.h"
 #include "ledger.h"
 #include "libbase58.h"
 #include "segwit-addr.h"
