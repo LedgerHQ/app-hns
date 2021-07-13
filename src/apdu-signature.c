@@ -140,6 +140,9 @@ static ledger_blake2b_ctx blake1;
 /* General purpose hashing context. */
 static ledger_blake2b_ctx blake2;
 
+/* Maximum size of elements in a transaction */
+#define MAX_NAME_SIZE 64
+
 /**
  * Parses an item from the covenant items list
  * and adds it to the provided hash context.
@@ -233,19 +236,19 @@ parse_name(
   uint8_t *name_len,
   ledger_blake2b_ctx *hash
 ) {
-  uint8_t n[64];
+  uint8_t n[MAX_NAME_SIZE];
   uint8_t nlen;
 
-  if (!read_varbytes(buf, len, n, 63, (size_t *)&nlen))
+  if (!read_varbytes(buf, len, n, MAX_NAME_SIZE - 1, (size_t *)&nlen))
     return false;
 
-  if (nlen < 1 || nlen > 63)
+  if (nlen < 1 || nlen > MAX_NAME_SIZE - 1)
     THROW(HNS_INCORRECT_NAME_LEN);
 
   n[nlen] = '\0';
   ledger_blake2b_update(hash, &nlen, 1);
   ledger_blake2b_update(hash, n, nlen);
-  strcpy(name, (char *)n);
+  strlcpy(name, (char *)n, MAX_NAME_SIZE);
   *name_len = nlen;
   ctx.next_item++;
   return true;
@@ -274,14 +277,14 @@ cmp_name(
   char *name,
   uint8_t *name_len
 ) {
-  uint8_t n[64];
+  uint8_t n[MAX_NAME_SIZE];
   size_t nlen;
   uint8_t digest[32];
 
-  if (!read_varbytes(buf, len, n, 63, &nlen))
+  if (!read_varbytes(buf, len, n, MAX_NAME_SIZE, &nlen))
     return false;
 
-  if (nlen < 1 || nlen > 63)
+  if (nlen < 1 || nlen > MAX_NAME_SIZE - 1)
     THROW(HNS_INCORRECT_NAME_LEN);
 
   if (!ledger_sha3(n, nlen, digest))
@@ -291,7 +294,7 @@ cmp_name(
     THROW(HNS_COVENANT_NAME_HASH_MISMATCH);
 
   n[nlen] = '\0';
-  strcpy(name, (char *)n);
+  strlcpy(name, (char *)n, MAX_NAME_SIZE);
   *name_len = nlen;
   ctx.next_item++;
   return true;
@@ -1204,24 +1207,25 @@ sign(
     static const char types[5][14] = {"", "ALL", "NONE", "SINGLE", "SINGLEREVERSE"};
     char *hdr = "Sighash Type";
     char *msg = ui->message;
+    size_t msg_size = sizeof(ui->message);
     uint8_t low = *type & 0x1f;
     uint8_t high = *type & 0xf0;
 
     if (low < SIGHASH_ALL || low > SIGHASH_SINGLEREVERSE)
       THROW(HNS_UNSUPPORTED_SIGHASH_TYPE);
 
-    strcpy(msg, types[low]);
+    strlcpy(msg, types[low], msg_size);
 
     switch(high) {
       case ZERO:
         break;
 
       case SIGHASH_NOINPUT:
-        strcat(msg, " | NOINPUT");
+        strlcat(msg, " | NOINPUT", msg_size);
         break;
 
       case SIGHASH_ANYONECANPAY:
-        strcat(msg, " | ANYONECANPAY");
+        strlcat(msg, " | ANYONECANPAY", msg_size);
         break;
 
       default:

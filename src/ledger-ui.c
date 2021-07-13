@@ -143,12 +143,13 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
           hns_output_t *out = &ctx->curr_output;
           char *hdr = "Covenant Type";
           char *msg = g_ledger.ui.message;
+          size_t msg_size = sizeof(g_ledger.ui.message);
           volatile uint8_t *flags = g_ledger.ui.flags;
 
           if (out->cov.type < HNS_NONE || out->cov.type > HNS_REVOKE)
             THROW(HNS_UNSUPPORTED_COVENANT_TYPE);
 
-          strcpy(msg, covenant_labels[out->cov.type]);
+          strlcpy(msg, covenant_labels[out->cov.type], msg_size);
           ledger_ui_update(LEDGER_UI_COVENANT_TYPE, hdr, msg, flags);
           break;
         }
@@ -172,9 +173,10 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
 
           char *hdr = "Name";
           char *msg = g_ledger.ui.message;
+          size_t msg_len = sizeof(g_ledger.ui.message);
           volatile uint8_t *flags = g_ledger.ui.flags;
 
-          strcpy(msg, out->cov.name);
+          strlcpy(msg, out->cov.name, msg_len);
 
           if(!ledger_ui_update(LEDGER_UI_NAME, hdr, msg, flags))
             THROW(HNS_CANNOT_UPDATE_UI);
@@ -200,7 +202,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
             if (netflag < 0 || netflag > 3)
               THROW(HNS_INCORRECT_P1);
 
-            strcpy(hrp, network_prefix[netflag]);
+            strlcpy(hrp, network_prefix[netflag], sizeof(hrp));
 
             if (!segwit_addr_encode(msg, hrp, ver, hash, len))
               THROW(HNS_CANNOT_ENCODE_ADDRESS);
@@ -250,7 +252,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
           if (netflag < 0 || netflag > 3)
             THROW(HNS_INCORRECT_P1);
 
-          strcpy(hrp, network_prefix[netflag]);
+          strlcpy(hrp, network_prefix[netflag], sizeof(hrp));
 
           if (!segwit_addr_encode(msg, hrp, a->ver, a->hash, a->hash_len))
             THROW(HNS_CANNOT_ENCODE_ADDRESS);

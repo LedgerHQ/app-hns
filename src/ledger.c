@@ -384,7 +384,6 @@ parse_der(uint8_t *der, uint8_t der_len, uint8_t *sig, uint8_t sig_sz) {
     memset(sig, 0, 32);
 
   der += len;
-  sig += 32;
 
   if (der != der_end)
     return false;
