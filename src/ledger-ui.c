@@ -37,20 +37,20 @@ static const char covenant_labels[12][9] = {
 
 #define LEDGER_UI_BACKGROUND() \
   {{BAGL_RECTANGLE,0,0,0,128,32,0,0,BAGL_FILL,0,0xFFFFFF,0,0}, \
-   NULL,0,0,0,NULL,NULL,NULL}
+   NULL}
 
 #define LEDGER_UI_ICON_LEFT(userid, glyph) \
   {{BAGL_ICON,userid,3,12,7,7,0,0,0,0xFFFFFF,0,0,glyph}, \
-   NULL,0,0,0,NULL,NULL,NULL}
+   NULL}
 
 #define LEDGER_UI_ICON_RIGHT(userid, glyph) \
   {{BAGL_ICON,userid,117,13,8,6,0,0,0,0xFFFFFF,0,0,glyph}, \
-   NULL,0,0,0,NULL,NULL,NULL}
+   NULL}
 
 #define LEDGER_UI_TEXT(userid, x, y, w, text) \
   {{BAGL_LABELINE,userid,x,y,w,12,0,0,0,0xFFFFFF,0, \
     BAGL_FONT_OPEN_SANS_REGULAR_11px|BAGL_FONT_ALIGNMENT_CENTER,0}, \
-   (char *)text,0,0,0,NULL,NULL,NULL}
+   (char *)text}
 
 static ux_menu_entry_t const main_menu[4];
 
@@ -117,7 +117,7 @@ static bagl_element_t const ledger_ui_display[] = {
  * name of the corresponding screen with '_button' appended.
  */
 static uint32_t
-ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
+ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
   switch (mask) {
     case BUTTON_EVT_RELEASED | BUTTON_LEFT: {
       ledger_apdu_buffer_clear();
@@ -143,12 +143,13 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
           hns_output_t *out = &ctx->curr_output;
           char *hdr = "Covenant Type";
           char *msg = g_ledger.ui.message;
+          size_t msg_size = sizeof(g_ledger.ui.message);
           volatile uint8_t *flags = g_ledger.ui.flags;
 
-          if (out->cov.type < HNS_NONE || out->cov.type > HNS_REVOKE)
+          if (out->cov.type > HNS_REVOKE)
             THROW(HNS_UNSUPPORTED_COVENANT_TYPE);
 
-          strcpy(msg, covenant_labels[out->cov.type]);
+          strlcpy(msg, covenant_labels[out->cov.type], msg_size);
           ledger_ui_update(LEDGER_UI_COVENANT_TYPE, hdr, msg, flags);
           break;
         }
@@ -172,9 +173,10 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
 
           char *hdr = "Name";
           char *msg = g_ledger.ui.message;
+          size_t msg_len = sizeof(g_ledger.ui.message);
           volatile uint8_t *flags = g_ledger.ui.flags;
 
-          strcpy(msg, out->cov.name);
+          strlcpy(msg, out->cov.name, msg_len);
 
           if(!ledger_ui_update(LEDGER_UI_NAME, hdr, msg, flags))
             THROW(HNS_CANNOT_UPDATE_UI);
@@ -200,7 +202,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
             if (netflag < 0 || netflag > 3)
               THROW(HNS_INCORRECT_P1);
 
-            strcpy(hrp, network_prefix[netflag]);
+            strlcpy(hrp, network_prefix[netflag], sizeof(hrp));
 
             if (!segwit_addr_encode(msg, hrp, ver, hash, len))
               THROW(HNS_CANNOT_ENCODE_ADDRESS);
@@ -250,7 +252,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
           if (netflag < 0 || netflag > 3)
             THROW(HNS_INCORRECT_P1);
 
-          strcpy(hrp, network_prefix[netflag]);
+          strlcpy(hrp, network_prefix[netflag], sizeof(hrp));
 
           if (!segwit_addr_encode(msg, hrp, a->ver, a->hash, a->hash_len))
             THROW(HNS_CANNOT_ENCODE_ADDRESS);
@@ -280,7 +282,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr) {
  * name of the corresponding screen with '_button' appended.
  */
 static uint32_t
-ledger_ui_display_button(uint32_t mask, uint32_t ctr) {
+ledger_ui_display_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
   char *viewport = g_ledger.ui.viewport;
   char *message = g_ledger.ui.message;
   uint8_t *pos = &g_ledger.ui.message_pos;

@@ -34,7 +34,7 @@ hns_boot(void) {
  */
 static inline void
 hns_loop(void) {
-  volatile uint8_t *buf = ledger_init();
+  uint8_t *buf = ledger_init();
   volatile uint8_t flags = 0;
   volatile uint16_t len = 0;
   volatile uint16_t sw = 0;
@@ -44,8 +44,8 @@ hns_loop(void) {
 
     BEGIN_TRY {
       TRY {
-        volatile uint8_t *in = buf + HNS_OFFSET_CDATA;
-        volatile uint8_t *out = buf;
+        uint8_t *in = buf + HNS_OFFSET_CDATA;
+        uint8_t *out = buf;
         uint8_t p1 = buf[HNS_OFFSET_P1];
         uint8_t p2 = buf[HNS_OFFSET_P2];
         uint8_t cla = buf[HNS_OFFSET_CLA];

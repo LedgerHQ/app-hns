@@ -5,6 +5,7 @@
  */
 #include <string.h>
 #include "apdu.h"
+#include "crypto.h"
 #include "ledger.h"
 #include "libbase58.h"
 #include "segwit-addr.h"
@@ -85,7 +86,7 @@ encode_xpub(
 ) {
   uint8_t data[82];
   uint8_t checksum[32];
-  volatile uint8_t *buf = data;
+  uint8_t *buf = data;
 
   switch(network) {
     case MAINNET:
@@ -126,8 +127,8 @@ hns_apdu_get_public_key(
   uint8_t p1,
   uint8_t p2,
   uint16_t len,
-  volatile uint8_t *buf,
-  volatile uint8_t *out,
+  uint8_t *buf,
+  uint8_t *out,
   volatile uint8_t *flags
 ) {
   if (!ledger_unlocked())

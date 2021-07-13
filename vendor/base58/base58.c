@@ -113,8 +113,9 @@ bool my_dblsha256(void *hash, const void *data, size_t datasz)
 	return b58_sha256_impl(buf, data, datasz) && b58_sha256_impl(hash, buf, sizeof(buf));
 }
 
-int b58check(const void *bin, size_t binsz, const char *base58str, size_t b58sz)
+int b58check(const void *bin, size_t binsz, const char *base58str, size_t b58sz __attribute__((unused)))
 {
+	// FIXME: b58sz should be used
 	unsigned char buf[32];
 	const uint8_t *binc = bin;
 	unsigned i;

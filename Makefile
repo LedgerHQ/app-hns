@@ -20,10 +20,10 @@ APPNAME = "Handshake"
 ICONNAME = nanos_icon_hns.gif
 APPVERSION = $(MAJOR).$(MINOR).$(PATCH)
 
-APP_LOAD_PARAMS = --appFlags 0xa50 --path "" --curve secp256k1 \
+APP_LOAD_PARAMS = --appFlags 0xa50 --path "44'/5353'" --curve secp256k1 \
                   $(COMMON_LOAD_PARAMS)
 APP_SOURCE_PATH = src vendor/bech32 vendor/base58
-SDK_SOURCE_PATH = lib_stusb lib_stusb_impl lib_u2f qrcode
+SDK_SOURCE_PATH = lib_stusb lib_stusb_impl lib_u2f
 
 ifeq ($(TARGET_NAME),TARGET_NANOX)
 SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl lib_ux
@@ -113,9 +113,6 @@ AS := $(GCCPATH)arm-none-eabi-gcc
 LD := $(GCCPATH)arm-none-eabi-gcc
 
 CFLAGS += -O3 -Os
-CFLAGS += -Wno-typedef-redefinition
-CFLAGS += -Wno-incompatible-pointer-types-discards-qualifiers
-CFLAGS += -I/usr/include/
 LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 

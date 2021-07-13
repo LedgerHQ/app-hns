@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "apdu.h"
+#include "crypto.h"
 #include "ledger.h"
 #include "utils.h"
 
@@ -140,6 +141,9 @@ static ledger_blake2b_ctx blake1;
 /* General purpose hashing context. */
 static ledger_blake2b_ctx blake2;
 
+/* Maximum size of elements in a transaction */
+#define MAX_NAME_SIZE 64
+
 /**
  * Parses an item from the covenant items list
  * and adds it to the provided hash context.
@@ -157,15 +161,15 @@ static ledger_blake2b_ctx blake2;
  */
 static inline bool
 parse_item(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *item,
   size_t item_sz,
   ledger_blake2b_ctx *hash
 ) {
-  uint8_t item_len;
+  size_t item_len;
 
-  if (!read_varbytes(buf, len, item, item_sz, (size_t *)&item_len))
+  if (!read_varbytes(buf, len, item, item_sz, &item_len))
     return false;
 
   if (item_len != item_sz)
@@ -192,16 +196,16 @@ parse_item(
  */
 static inline bool
 parse_addr(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *addr_hash,
   uint8_t *addr_len,
   ledger_blake2b_ctx *hash
 ){
   uint8_t a[32];
-  uint8_t alen;
+  size_t alen;
 
-  if (!read_varbytes(buf, len, a, 32, (size_t *)&alen))
+  if (!read_varbytes(buf, len, a, 32, &alen))
     return false;
 
   ledger_blake2b_update(hash, &alen, 1);
@@ -227,25 +231,25 @@ parse_addr(
  */
 static inline bool
 parse_name(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   char *name,
   uint8_t *name_len,
   ledger_blake2b_ctx *hash
 ) {
-  uint8_t n[64];
-  uint8_t nlen;
+  uint8_t n[MAX_NAME_SIZE];
+  size_t nlen;
 
-  if (!read_varbytes(buf, len, n, 63, (size_t *)&nlen))
+  if (!read_varbytes(buf, len, n, MAX_NAME_SIZE - 1, &nlen))
     return false;
 
-  if (nlen < 1 || nlen > 63)
+  if (nlen < 1 || nlen > MAX_NAME_SIZE - 1)
     THROW(HNS_INCORRECT_NAME_LEN);
 
   n[nlen] = '\0';
   ledger_blake2b_update(hash, &nlen, 1);
   ledger_blake2b_update(hash, n, nlen);
-  strcpy(name, (char *)n);
+  strlcpy(name, (char *)n, MAX_NAME_SIZE);
   *name_len = nlen;
   ctx.next_item++;
   return true;
@@ -268,20 +272,20 @@ parse_name(
  */
 static inline bool
 cmp_name(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   uint8_t *name_hash,
   char *name,
   uint8_t *name_len
 ) {
-  uint8_t n[64];
+  uint8_t n[MAX_NAME_SIZE];
   size_t nlen;
   uint8_t digest[32];
 
-  if (!read_varbytes(buf, len, n, 63, &nlen))
+  if (!read_varbytes(buf, len, n, MAX_NAME_SIZE, &nlen))
     return false;
 
-  if (nlen < 1 || nlen > 63)
+  if (nlen < 1 || nlen > MAX_NAME_SIZE - 1)
     THROW(HNS_INCORRECT_NAME_LEN);
 
   if (!ledger_sha3(n, nlen, digest))
@@ -291,7 +295,7 @@ cmp_name(
     THROW(HNS_COVENANT_NAME_HASH_MISMATCH);
 
   n[nlen] = '\0';
-  strcpy(name, (char *)n);
+  strlcpy(name, (char *)n, MAX_NAME_SIZE);
   *name_len = nlen;
   ctx.next_item++;
   return true;
@@ -312,7 +316,7 @@ cmp_name(
  */
 static inline bool
 parse_resource_len(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   hns_varint_t *ctr,
   ledger_blake2b_ctx *hash
@@ -345,7 +349,7 @@ parse_resource_len(
  */
 static inline bool
 parse_resource(
-  volatile uint8_t **buf,
+  uint8_t **buf,
   uint16_t *len,
   hns_varint_t *ctr,
   ledger_blake2b_ctx *hash
@@ -393,8 +397,8 @@ static inline uint8_t
 parse(
   uint8_t p1,
   uint16_t *len,
-  volatile uint8_t *buf,
-  volatile uint8_t *res,
+  uint8_t *buf,
+  uint8_t *res,
   volatile uint8_t *flags
 ) {
   hns_input_t in;
@@ -955,9 +959,6 @@ inner_break:
     if (should_continue)
       continue;
 
-    if (*len < 0)
-      THROW(HNS_INCORRECT_PARSER_STATE);
-
     if (*len > 0)
       if(!ledger_apdu_cache_write(buf, *len))
         THROW(HNS_INCORRECT_PARSER_STATE);
@@ -989,8 +990,8 @@ static inline uint8_t
 sign(
   uint8_t p1,
   uint16_t *len,
-  volatile uint8_t *buf,
-  volatile uint8_t *sig,
+  uint8_t *buf,
+  uint8_t *sig,
   volatile uint8_t *flags
 ) {
   if (!ctx.tx_parsed)
@@ -1204,24 +1205,25 @@ sign(
     static const char types[5][14] = {"", "ALL", "NONE", "SINGLE", "SINGLEREVERSE"};
     char *hdr = "Sighash Type";
     char *msg = ui->message;
+    size_t msg_size = sizeof(ui->message);
     uint8_t low = *type & 0x1f;
     uint8_t high = *type & 0xf0;
 
     if (low < SIGHASH_ALL || low > SIGHASH_SINGLEREVERSE)
       THROW(HNS_UNSUPPORTED_SIGHASH_TYPE);
 
-    strcpy(msg, types[low]);
+    strlcpy(msg, types[low], msg_size);
 
     switch(high) {
       case ZERO:
         break;
 
       case SIGHASH_NOINPUT:
-        strcat(msg, " | NOINPUT");
+        strlcat(msg, " | NOINPUT", msg_size);
         break;
 
       case SIGHASH_ANYONECANPAY:
-        strcat(msg, " | ANYONECANPAY");
+        strlcat(msg, " | ANYONECANPAY", msg_size);
         break;
 
       default:
@@ -1245,8 +1247,8 @@ hns_apdu_get_input_signature(
   uint8_t p1,
   uint8_t p2,
   uint16_t len,
-  volatile uint8_t *in,
-  volatile uint8_t *out,
+  uint8_t *in,
+  uint8_t *out,
   volatile uint8_t *flags
 ) {
   switch(p1 & P1_INIT_MASK) {
