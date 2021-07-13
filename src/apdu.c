@@ -80,9 +80,6 @@ ledger_apdu_cache_flush(uint16_t *len) {
   if (*len + cache_len > g_ledger_apdu_buffer_size)
     return 0;
 
-  if (*len < 0)
-    return 0;
-
   if (*len > 0) {
     buffer += 5; /* Don't overwrite APDU header. */
     memmove(buffer + cache_len, buffer, *len);

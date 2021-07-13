@@ -959,9 +959,6 @@ inner_break:
     if (should_continue)
       continue;
 
-    if (*len < 0)
-      THROW(HNS_INCORRECT_PARSER_STATE);
-
     if (*len > 0)
       if(!ledger_apdu_cache_write(buf, *len))
         THROW(HNS_INCORRECT_PARSER_STATE);

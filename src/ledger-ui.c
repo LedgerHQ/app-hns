@@ -146,7 +146,7 @@ ledger_ui_approve_button(uint32_t mask, uint32_t ctr __attribute__((unused))) {
           size_t msg_size = sizeof(g_ledger.ui.message);
           volatile uint8_t *flags = g_ledger.ui.flags;
 
-          if (out->cov.type < HNS_NONE || out->cov.type > HNS_REVOKE)
+          if (out->cov.type > HNS_REVOKE)
             THROW(HNS_UNSUPPORTED_COVENANT_TYPE);
 
           strlcpy(msg, covenant_labels[out->cov.type], msg_size);
