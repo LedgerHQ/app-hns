@@ -166,9 +166,9 @@ parse_item(
   size_t item_sz,
   ledger_blake2b_ctx *hash
 ) {
-  uint8_t item_len;
+  size_t item_len;
 
-  if (!read_varbytes(buf, len, item, item_sz, (size_t *)&item_len))
+  if (!read_varbytes(buf, len, item, item_sz, &item_len))
     return false;
 
   if (item_len != item_sz)
@@ -202,9 +202,9 @@ parse_addr(
   ledger_blake2b_ctx *hash
 ){
   uint8_t a[32];
-  uint8_t alen;
+  size_t alen;
 
-  if (!read_varbytes(buf, len, a, 32, (size_t *)&alen))
+  if (!read_varbytes(buf, len, a, 32, &alen))
     return false;
 
   ledger_blake2b_update(hash, &alen, 1);
@@ -237,9 +237,9 @@ parse_name(
   ledger_blake2b_ctx *hash
 ) {
   uint8_t n[MAX_NAME_SIZE];
-  uint8_t nlen;
+  size_t nlen;
 
-  if (!read_varbytes(buf, len, n, MAX_NAME_SIZE - 1, (size_t *)&nlen))
+  if (!read_varbytes(buf, len, n, MAX_NAME_SIZE - 1, &nlen))
     return false;
 
   if (nlen < 1 || nlen > MAX_NAME_SIZE - 1)
